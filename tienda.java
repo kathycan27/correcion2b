@@ -82,16 +82,76 @@ public class tienda {
 
             }
         });
+
         cbtipo.addActionListener(new ActionListener() {
-            Connection con;
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                rellenarTipos("tipos",valor,cbtipo);
 
             }
         });
-    }
+
+        buscarButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Connection con;
+                btnactualizar.setEnabled(true);
+                try {
+                    String combotipo=cbtipo.getSelectedItem().toString();
+                    con = getConection();
+                    statement = con.createStatement();
+                    ResultSet rs;
+                    rs = statement.executeQuery("select * from product where codigo=" + txtcodigo.getText() + ";");
+                    while (rs.next()) {
+                        txtnombre.setText(rs.getString("nombre"));
+                        cbtipo.setSelectedItem(rs.getString("tipo"));
+                        txtprecio.setText(rs.getString("precio"));
+                        txtunidades.setText(rs.getString("unidad"));
+                        cbdetails.setSelectedItem(rs.getString("details"));
+                    }
+                } catch (Exception s) {
+
+                }
+            }
+        });
+        btnactualizar.addActionListener(new ActionListener() {
+            Connection con2;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try{
+                    String tipoa = cbtipo.getSelectedItem().toString();
+                    String detailsa = cbdetails.getSelectedItem().toString();
+                    con2 = getConection();
+                    st = con2.prepareStatement("UPDATE product SET nombre = ?, tipo = ?, precio = ?, unidad = ?, details = ? WHERE CI_DUENIO ="+txtcodigo.getText() );
+
+                    st.setString(1,txtnombre.getText());
+                    st.setString(2,txtnombre.getText());
+                    st.setString(3,tipoa);
+                    st.setString(5, marca);
+                    st.setString(6, color);
+
+                    System.out.println(ps);
+                    int res = st.executeUpdate();
+
+                    if(res > 0 ){
+                        JOptionPane.showMessageDialog(null,"La actualización se realizado con EXITO!");
+                        CID.setText("");
+                        NomD.setText("");
+                        ApeD.setText("");
+                        EdadD.setText("");
+                    }else{
+                        JOptionPane.showMessageDialog(null,"Error, datos invalidos!! ERROR !!");
+                    }
+                    con2.close();
+                }catch (HeadlessException | SQLException f){
+                    System.out.println(f);
+                }
+            }
+        }
+    );
+}
+
+
 
     public static Connection getConection() {
         Connection con = null;
