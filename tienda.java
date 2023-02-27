@@ -2,9 +2,13 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Iterator;
 
 public class tienda {
     private JPanel panel1;
@@ -23,28 +27,96 @@ public class tienda {
     PreparedStatement st;
     String tabla, valor;
     JComboBox combo;
-    Connection con;
+    Connection con=getConection();
     Statement statement;
     ResultSet rs;
-    public void rellenarTipos(String tabla, String valor,JComboBox combo)
+    ArrayList tListaTipos;
+    private ArrayList <Tipo> tipop;
+    ArrayList dListaDetails;
+    private ArrayList<Detalles> detallesp;
+    public void rellenarTipos()
     {
-        String sql="select * from "+tabla;
-        try {
-            con=getConection();
-            statement=con.createStatement();
-            while (rs.next())
-            {
-                combo.addItem(rs.getString(valor));
-            }
-        }catch (SQLException g)
-        {
-            JOptionPane.showMessageDialog(null, "Error"+ g.toString());
+         con=getConection();
+        cbtipo.removeAllItems();
+        tListaTipos=getListTipop();
+        Iterator iterator = tListaTipos.iterator();
+        while (iterator.hasNext()) {
+            Tipo tTipo = (Tipo) iterator.next();
+            cbtipo.addItem(tTipo);
         }
     }
+    public ArrayList getListTipop()
+    {
 
+        ArrayList tTipoT=new ArrayList();
+        Tipo tTIP=null;
+        Statement consulta;
+        ResultSet resultado;
+        con=getConection();
+        try {
+            consulta= con.createStatement();
+            resultado=consulta.executeQuery("select * from tipos1");
+            while (resultado.next())
+            {
+                tTIP=new Tipo();
+                tTIP.setIndice(resultado.getInt("indice"));
+                tTIP.setTipo(resultado.getString("tipo"));
+                tTipoT.add(tTIP);
+            }
+
+        }catch (SQLException e)
+        {
+
+        }
+        return tTipoT;}
+    public void llenarDetalles() {
+        con=getConection();
+
+        cbdetails.removeAllItems();
+        dListaDetails=getListDetalles();
+
+        Iterator iterator = dListaDetails.iterator();
+        while (iterator.hasNext()) {
+            Detalles mDetalle = (Detalles) iterator.next();
+            cbdetails.addItem(mDetalle);
+        }
+
+
+    }
+
+
+
+    public ArrayList getListDetalles()
+    {
+
+        ArrayList mListaMaterias=new ArrayList();
+        Detalles dDetails=null;
+        Statement consulta;
+        ResultSet resultado;
+        con=getConection();
+        try {
+            consulta= con.createStatement();
+            resultado=consulta.executeQuery("select * from detalles");
+            while (resultado.next())
+            {
+                dDetails=new Detalles();
+                dDetails.setIndice(resultado.getInt("indice"));
+                dDetails.setDetalle(resultado.getString("detalle"));
+                dListaDetails.add(dDetails);
+            }
+
+        }catch (SQLException e)
+        {
+
+        }
+        return dListaDetails;
+    }
     public tienda() {
-
-
+con=getConection();
+tListaTipos=new ArrayList();
+rellenarTipos();
+dListaDetails=new ArrayList();
+llenarDetalles();
 
     crearButton.addActionListener(new ActionListener() {
            Connection connection;
@@ -109,16 +181,19 @@ public class tienda {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Connection con;
+
+                String tipop = cbtipo.getSelectedItem().toString();
+                String detailsp = cbdetails.getSelectedItem().toString();
                 try {
-                    String combotipo=cbtipo.getSelectedItem().toString();
                     con = getConection();
                     statement = con.createStatement();
                     ResultSet rs;
+                    ResultSet rsc;
                     rs = statement.executeQuery("select * from product1 where codigo=" + txtcodigo.getText() + ";");
                     if(rs.next()){
                      do{
                         txtnombre.setText(rs.getString("nombre"));
-                        cbtipo.setSelectedItem(rs.getString("tipo"));
+                        cbtipo.addItem(rs.getString("tipo"));
                         txtprecio.setText(rs.getString("precio"));
                         txtunidades.setText(rs.getString("unidad"));
                         cbdetails.setSelectedItem(rs.getString("details"));
@@ -190,6 +265,30 @@ public class tienda {
                         }
                     }
 
+        });
+        cbtipo.addActionListener(new ActionListener() {
+
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cbtipo.getSelectedItem().toString();
+
+            }
+        });
+        cbdetails.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cbdetails.getSelectedItem().toString();
+            }
+        });
+        buscarButton.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+                super.mouseClicked(e);
+
+
+            }
         });
     }
 
