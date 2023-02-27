@@ -50,64 +50,82 @@ public class tienda {
            Connection connection;
             @Override
             public void actionPerformed(ActionEvent e) {
+
                 connection = getConection();
                 String tipop = cbtipo.getSelectedItem().toString();
                 String detailsp = cbdetails.getSelectedItem().toString();
-                try{
-                    st = connection.prepareStatement("INSERT INTO product(codigo,nombre,tipo,precio,unidad,details) VALUES (?,?,?,?,?,?)");
+            if(txtcodigo.getText().equals("")||txtnombre.getText().equals("")||txtprecio.getText().equals("")||txtunidades.getText().equals(""))
+                {
+                     JOptionPane.showMessageDialog(null, "Uno varios campos vacios");
+                }else {
+                try {
+                 con = getConection();
+                 statement = con.createStatement();
+                 rs = statement.executeQuery("select * from product1 where codigo=" + txtcodigo.getText() + ";");
 
-                    st.setString(1,txtcodigo.getText());
-                    st.setString(2,txtnombre.getText());
-                    st.setString(4,txtprecio.getText());
-                    st.setString(5,txtunidades.getText());
-                    st.setString(3, tipop);
-                    st.setString(6, detailsp);
+             if(rs.next()){
 
-                    int res = st.executeUpdate();
+        JOptionPane.showMessageDialog(null,"Codigo ya ocupado||Producto ya registrado");
+    }else {
+                 try {
 
-                    if(res > 0){
-                        JOptionPane.showMessageDialog(null, "Se creo de manera correta");
-                        txtcodigo.setText("");
-                        txtnombre.setText("");
-                        txtprecio.setText("");
-                        txtunidades.setText("");
-                    }else {
-                        JOptionPane.showMessageDialog(null, "No se pudo crear");
-                    }
-
-                }catch (HeadlessException | SQLException f){
-                    System.out.println(f);
-                }
+                     st = connection.prepareStatement("INSERT INTO product1(codigo,nombre,tipo,precio,unidad,details) VALUES (?,?,?,?,?,?)");
 
 
-            }
+                     st.setString(1, txtcodigo.getText());
+                     st.setString(2, txtnombre.getText());
+                     st.setString(4, txtprecio.getText());
+                     st.setString(5, txtunidades.getText());
+                     st.setString(3, tipop);
+                     st.setString(6, detailsp);
+
+                     int res = st.executeUpdate();
+
+                     if (res > 0) {
+                         JOptionPane.showMessageDialog(null, "Se creo de manera correta");
+                         txtcodigo.setText("");
+                         txtnombre.setText("");
+                         txtprecio.setText("");
+                         txtunidades.setText("");
+                     }
+
+                 } catch (HeadlessException | SQLException f) {
+                     System.out.println(f);
+
+             }}}
+             catch (Exception s) {
+
+             }    }}
+
+
+
+
+
+
         });
 
-        cbtipo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-
-
-            }
-        });
 
         buscarButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 Connection con;
-                btnactualizar.setEnabled(true);
                 try {
                     String combotipo=cbtipo.getSelectedItem().toString();
                     con = getConection();
                     statement = con.createStatement();
                     ResultSet rs;
-                    rs = statement.executeQuery("select * from product where codigo=" + txtcodigo.getText() + ";");
-                    while (rs.next()) {
+                    rs = statement.executeQuery("select * from product1 where codigo=" + txtcodigo.getText() + ";");
+                    if(rs.next()){
+                     do{
                         txtnombre.setText(rs.getString("nombre"));
                         cbtipo.setSelectedItem(rs.getString("tipo"));
                         txtprecio.setText(rs.getString("precio"));
                         txtunidades.setText(rs.getString("unidad"));
                         cbdetails.setSelectedItem(rs.getString("details"));
+                    }while (rs.next());
+                        JOptionPane.showMessageDialog(null,"Producto Encontrado||Listo");
+                    }else {
+                        JOptionPane.showMessageDialog(null,"El producto aun no ha sido registrado || No se encuentra en la base de datos");
                     }
                 } catch (Exception s) {
 
@@ -122,47 +140,71 @@ public class tienda {
                     String tipoa = cbtipo.getSelectedItem().toString();
                     String detailsa = cbdetails.getSelectedItem().toString();
                     con2 = getConection();
-                    st = con2.prepareStatement("UPDATE product SET nombre = ?, tipo = ?, precio = ?, unidad = ?, details = ? WHERE CI_DUENIO ="+txtcodigo.getText() );
+                    st = con2.prepareStatement("UPDATE product1 SET tipo = ?, nombre = ? ,precio  = ? ,unidad = ? ,details = ? WHERE codigo ="+txtcodigo.getText());
 
-                    st.setString(1,txtnombre.getText());
+                    st.setString(1,tipoa);
                     st.setString(2,txtnombre.getText());
-                    st.setString(3,tipoa);
-                    st.setString(5, marca);
-                    st.setString(6, color);
+                    st.setString(3,txtprecio.getText());
+                    st.setString(4, txtunidades.getText());
+                    st.setString(5, detailsa);
 
-                    System.out.println(ps);
+
+                    System.out.println(st);
                     int res = st.executeUpdate();
 
                     if(res > 0 ){
                         JOptionPane.showMessageDialog(null,"La actualización se realizado con EXITO!");
-                        CID.setText("");
-                        NomD.setText("");
-                        ApeD.setText("");
-                        EdadD.setText("");
+                        txtcodigo.setText("");
+                        txtnombre.setText("");
+                        txtprecio.setText("");
+                        txtunidades.setText("");
+
                     }else{
-                        JOptionPane.showMessageDialog(null,"Error, datos invalidos!! ERROR !!");
+                        JOptionPane.showMessageDialog(null,"Error, producto no registrado");
                     }
                     con2.close();
-                }catch (HeadlessException | SQLException f){
+                }catch (SQLException f){
                     System.out.println(f);
                 }
             }
         }
     );
-}
+        borrarButton.addActionListener(new ActionListener() {
+            Connection con4;
+            @Override
+            public void actionPerformed(ActionEvent e) {
+
+                        con4 = getConection();
+
+                        try {
+                            st = con4.prepareStatement("DELETE FROM product1 WHERE codigo ="+txtcodigo.getText());
+                            int res = st.executeUpdate();
+
+                            if(res > 0 ){
+                                JOptionPane.showMessageDialog(null,"Se elemino con exito");
+                            }else{
+                                JOptionPane.showMessageDialog(null,"No existe el producto");
+                            }
+                        }catch (HeadlessException | SQLException f){
+                            System.out.println(f);
+                        }
+                    }
+
+        });
+    }
 
 
 
     public static Connection getConection() {
         Connection con = null;
         String base = "tienda";
-        String url = "jdbc:mysql://localhost:3306/" + base;
+        String url = "jdbc:mysql://localhost:3307/" + base;
         String user = "root";
-        String password = "luchito";
+        String password = "Luchito2724";
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             con = DriverManager.getConnection(url, user, password);
-            System.out.println("si se conecto");
+           // System.out.println("si se conecto");
         } catch (ClassNotFoundException | SQLException e) {
             System.err.println(e);
         }
