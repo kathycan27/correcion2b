@@ -1,14 +1,14 @@
 use tienda;
-create table tipos
+create table tipos1
 (
-indice int,
+indice int auto_increment primary key,
 tipo varchar(20)
 );
-insert into tipos(indice, tipo)values
-(1, "fruta"),
-(2, "carne"),
-(3, "bebidas"),
-(4, "lacteos"),
-(5, "vegetales"),
-(6, "snacks");
-select * from tipos;
+insert into tipos1( tipo)values
+( "fruta"),
+("carne"),
+("bebidas"),
+("lacteos"),
+("vegetales"),
+("snacks");
+select * from tipos1;
